@@ -1,5 +1,3 @@
-// change instances of undefined with !
-// round answers with long decimals to 3 decimal places
 // decimal . button, disabled if there is already a . in the display
 // backspace button
 // keyboard support
@@ -175,10 +173,11 @@ function operate(theOperator, number1, number2) {
   } else if (theOperator == "÷") {
     answer = divide(number1, number2);
   }
+  answer = answer.toFixed(3);
 
   clear();
   if (answer === divideByZeroText) calculatorDisplay.textContent = answer
-  setFirstOrSecondNumber(answer.toString());
+  setFirstOrSecondNumber(answer);
 
   console.log(calculatorDisplay.textContent);
 }
