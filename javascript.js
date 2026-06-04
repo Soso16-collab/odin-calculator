@@ -1,11 +1,10 @@
-// the code should operate when 2 numbers exist and a second operator is clicked, the result should become the first number
 // change instances of undefined with !
 // round answers with long decimals to 3 decimal places
 // decimal . button, disabled if there is already a . in the display
 // backspace button
 // keyboard support
 // html + css
-var operator;
+var operator = null;
 var firstNumber = "";
 var secondNumber = "";
 var displayText = "";
@@ -88,7 +87,7 @@ divideButton.addEventListener("click", () => {
 });
 
 equalsButton.addEventListener("click", () => {
-  if (operator !== undefined && firstNumber !== "" && secondNumber !== "") {
+  if (operator && firstNumber !== "" && secondNumber !== "") {
     operate(operator, firstNumber, secondNumber);
   }
 });
@@ -105,7 +104,7 @@ function appendDisplayText(appendingText) {
 function setFirstOrSecondNumber(number) {
   if (number === divideByZeroText) {
     return;
-  } else if (operator === undefined) {
+  } else if (!operator) {
     firstNumber += number;
     appendDisplayText("" + number);
   } else {
@@ -119,10 +118,10 @@ function setFirstOrSecondNumber(number) {
 function setOperator(pendingOperator) {
   if (operator === "÷" && secondNumber === "0") { // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
     return;
-  } else if (firstNumber !== "" && operator === undefined) {
+  } else if (firstNumber !== "" && !operator) {
     operator = pendingOperator;
     appendDisplayText(" " + operator + " ");
-  } else if (operator !== undefined && firstNumber !== "" && secondNumber !== "") { // This will run if an equation is present but an operator is clicked
+  } else if (operator && firstNumber !== "" && secondNumber !== "") { // This will run if an equation is present but an operator is clicked
     operate(operator, firstNumber, secondNumber);
     operator = pendingOperator;
     appendDisplayText(" " + operator + " ");
@@ -152,7 +151,7 @@ function divide(number1, number2) {
 
 function clear() {
   firstNumber = "";
-  operator = undefined;
+  operator = null;
   secondNumber = "";
   displayText = "";
 }
