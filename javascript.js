@@ -1,12 +1,15 @@
 // the code should operate when 2 numbers exist and a second operator is clicked, the result should become the first number
+// change instances of undefined with !
 // round answers with long decimals to 3 decimal places
 // decimal . button, disabled if there is already a . in the display
 // backspace button
 // keyboard support
+// html + css
 var operator;
 var firstNumber = "";
 var secondNumber = "";
 var displayText = "";
+var divideByZeroText = "Nice try! You can't divide by zero."
 
 const zeroButton = document.querySelector("#zero-button");
 const oneButton = document.querySelector("#one-button");
@@ -87,13 +90,12 @@ divideButton.addEventListener("click", () => {
 equalsButton.addEventListener("click", () => {
   if (operator !== undefined && firstNumber !== "" && secondNumber !== "") {
     operate(operator, firstNumber, secondNumber);
-    clear();
   }
 });
 
 clearButton.addEventListener("click", () => {
   clearText();
-  console.log(firstNumber + " " + operator + " " + secondNumber);
+  testLog();
 });
 
 function appendDisplayText(appendingText) {
@@ -101,7 +103,9 @@ function appendDisplayText(appendingText) {
 }
 
 function setFirstOrSecondNumber(number) {
-  if (operator === undefined) {
+  if (number === divideByZeroText) {
+    return;
+  } else if (operator === undefined) {
     firstNumber += number;
     appendDisplayText("" + number);
   } else {
@@ -109,18 +113,21 @@ function setFirstOrSecondNumber(number) {
     appendDisplayText("" + number);
   }
 
-  console.log(firstNumber);
-  console.log(secondNumber);
-  console.log(operator);
+  testLog();
 }
 
 function setOperator(pendingOperator) {
-  if (firstNumber !== "" && operator === undefined) {
+  if (operator === "÷" && secondNumber === "0") { // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
+    return;
+  } else if (firstNumber !== "" && operator === undefined) {
     operator = pendingOperator;
     appendDisplayText(" " + operator + " ");
-  }
-
-  console.log(firstNumber + " " + operator + " " + secondNumber);
+  } else if (operator !== undefined && firstNumber !== "" && secondNumber !== "") { // This will run if an equation is present but an operator is clicked
+    operate(operator, firstNumber, secondNumber);
+    operator = pendingOperator;
+    appendDisplayText(" " + operator + " ");
+  };
+  testLog();
 }
 
 function add(number1, number2) {
@@ -137,7 +144,7 @@ function multiply(number1, number2) {
 
 function divide(number1, number2) {
   if (number2 == 0) {
-    return "Nice try! You can't divide by zero.";
+    return divideByZeroText;
   } 
   return number1 / number2;
 
@@ -158,16 +165,25 @@ function clearText() {
 function operate(theOperator, number1, number2) {
   number1 = Number(number1);
   number2 = Number(number2);
+  let answer = null;
 
   if (theOperator == "+") {
-    appendDisplayText(" = " + add(number1, number2));
+    answer = add(number1, number2);
   } else if (theOperator == "-") {
-    appendDisplayText(" = " + subtract(number1, number2));
+    answer = subtract(number1, number2);
   } else if (theOperator == "×") {
-    appendDisplayText(" = " + multiply(number1, number2));
+    answer = multiply(number1, number2);
   } else if (theOperator == "÷") {
-    appendDisplayText(" = " + divide(number1, number2));
+    answer = divide(number1, number2);
   }
 
+  clear();
+  if (answer === divideByZeroText) calculatorDisplay.textContent = answer
+  setFirstOrSecondNumber(answer.toString());
+
   console.log(calculatorDisplay.textContent);
+}
+
+function testLog() {
+  console.log(firstNumber + " " + operator + " " + secondNumber);
 }
