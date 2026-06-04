@@ -1,10 +1,9 @@
-// GET RID OF EMPTY STRING EQUALITY CHECKS
-// Add semicolons 
+// GET RID OF EMPTY STRING EQUALITY CHECKS 
 // instead of "" + number, do number.toString()
 // fix rounding when there is less then 3 decimal places, such as 5.600
-// decimal . button, disabled if there is already a . in the display
 // backspace button
 // keyboard support
+// Add semicolons
 // html + css
 var operator = null;
 var firstNumber = "";
@@ -92,7 +91,7 @@ divideButton.addEventListener("click", () => {
 });
 
 equalsButton.addEventListener("click", () => {
-  if (operator && firstNumber !== "" && secondNumber !== "") {
+  if (operator && firstNumber && secondNumber) {
     operate(operator, firstNumber, secondNumber);
   }
 });
@@ -111,10 +110,10 @@ function setFirstOrSecondNumber(number) {
     return;
   } else if (!operator) {
     firstNumber += number;
-    appendDisplayText("" + number);
+    appendDisplayText(number.toString());
   } else {
     secondNumber += number;
-    appendDisplayText("" + number);
+    appendDisplayText(number.toString());
   }
 
   testLog();
@@ -123,10 +122,10 @@ function setFirstOrSecondNumber(number) {
 function setOperator(pendingOperator) {
   if (operator === "÷" && secondNumber === "0") { // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
     return;
-  } else if (firstNumber !== "" && !operator) {
+  } else if (firstNumber && !operator) {
     operator = pendingOperator;
     appendDisplayText(" " + operator + " ");
-  } else if (operator && firstNumber !== "" && secondNumber !== "") { // This will run if an equation is present but an operator is clicked
+  } else if (operator && firstNumber && secondNumber) { // This will run if an equation is present but an operator is clicked
     operate(operator, firstNumber, secondNumber);
     operator = pendingOperator;
     appendDisplayText(" " + operator + " ");
