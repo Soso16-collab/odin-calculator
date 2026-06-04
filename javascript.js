@@ -1,3 +1,7 @@
+// GET RID OF EMPTY STRING EQUALITY CHECKS
+// Add semicolons 
+// instead of "" + number, do number.toString()
+// fix rounding when there is less then 3 decimal places, such as 5.600
 // decimal . button, disabled if there is already a . in the display
 // backspace button
 // keyboard support
@@ -18,6 +22,7 @@ const sixButton = document.querySelector("#six-button");
 const sevenButton = document.querySelector("#seven-button");
 const eightButton = document.querySelector("#eight-button");
 const nineButton = document.querySelector("#nine-button");
+const decimalButton = document.querySelector("#decimal-button")
 
 const plusButton = document.querySelector("#plus-button");
 const subtractButton = document.querySelector("#subtract-button");
@@ -67,6 +72,8 @@ eightButton.addEventListener("click", () => {
 nineButton.addEventListener("click", () => {
   setFirstOrSecondNumber("9");
 });
+
+decimalButton.addEventListener("click", addDecimalPoint);
 
 plusButton.addEventListener("click", () => {
   setOperator("+");
@@ -127,25 +134,37 @@ function setOperator(pendingOperator) {
   testLog();
 }
 
+function addDecimalPoint() {
+  if (operator === "÷" && secondNumber === "0") { // If the user attempts to divide by zero, the answer of that cannot be added on to and so the decimal button will be disabled
+    return;
+  } else if (!operator && firstNumber && !firstNumber.includes(".")) {
+    firstNumber += ".";
+    appendDisplayText(".");
+  } else if (operator && secondNumber && !secondNumber.includes(".")) {
+    secondNumber += ".";
+    appendDisplayText(".");
+  };
+};
+
 function add(number1, number2) {
   return number1 + number2;
-}
+};
 
 function subtract(number1, number2) {
   return number1 - number2;
-}
+};
 
 function multiply(number1, number2) {
   return number1 * number2;
-}
+};
 
 function divide(number1, number2) {
   if (number2 == 0) {
     return divideByZeroText;
-  } 
+  }; 
   return number1 / number2;
 
-}
+};
 
 function clear() {
   firstNumber = "";
