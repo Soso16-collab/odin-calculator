@@ -1,5 +1,3 @@
-// GET RID OF EMPTY STRING EQUALITY CHECKS 
-// instead of "" + number, do number.toString()
 // fix rounding when there is less then 3 decimal places, such as 5.600
 // backspace button
 // keyboard support
@@ -191,11 +189,11 @@ function operate(theOperator, number1, number2) {
   } else if (theOperator == "÷") {
     answer = divide(number1, number2);
   }
-  answer = answer.toFixed(3);
+  answer = Math.round(answer * 1000) / 1000
 
   clear();
   if (answer === divideByZeroText) calculatorDisplay.textContent = answer
-  setFirstOrSecondNumber(answer);
+  setFirstOrSecondNumber(answer.toString());
 
   console.log(calculatorDisplay.textContent);
 }
