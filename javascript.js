@@ -1,12 +1,9 @@
-// git commit text: fixed dividing by a decimal starting with "0." not working and (explain backspace)
-// keyboard support
-// Add semicolons
 // html + css
 var operator = null;
 var firstNumber = "";
 var secondNumber = "";
 var displayText = "";
-var divideByZeroText = "Nice try! You can't divide by zero."
+var divideByZeroText = "Nice try! You can't divide by zero.";
 
 const zeroButton = document.querySelector("#zero-button");
 const oneButton = document.querySelector("#one-button");
@@ -18,7 +15,7 @@ const sixButton = document.querySelector("#six-button");
 const sevenButton = document.querySelector("#seven-button");
 const eightButton = document.querySelector("#eight-button");
 const nineButton = document.querySelector("#nine-button");
-const decimalButton = document.querySelector("#decimal-button")
+const decimalButton = document.querySelector("#decimal-button");
 
 const plusButton = document.querySelector("#plus-button");
 const subtractButton = document.querySelector("#subtract-button");
@@ -26,7 +23,7 @@ const multiplyButton = document.querySelector("#multiply-button");
 const divideButton = document.querySelector("#divide-button");
 const equalsButton = document.querySelector("#equals-button");
 const clearButton = document.querySelector("#clear-button");
-const backspaceButton = document.querySelector("#backspace-button")
+const backspaceButton = document.querySelector("#backspace-button");
 
 const calculatorDisplay = document.querySelector("#calculator-display");
 
@@ -81,11 +78,11 @@ subtractButton.addEventListener("click", () => {
 });
 
 multiplyButton.addEventListener("click", () => {
-  setOperator("×");
+  setOperator("*");
 });
 
 divideButton.addEventListener("click", () => {
-  setOperator("÷");
+  setOperator("/");
 });
 
 equalsButton.addEventListener("click", () => {
@@ -105,10 +102,26 @@ function appendDisplayText(appendingText) {
   calculatorDisplay.textContent = displayText += appendingText;
 }
 
+document.addEventListener("keydown", (event) => {
+  if (!Number.isNaN(Number(event.key))) {
+    setFirstOrSecondNumber(event.key);
+  } else if (event.key === ".") {
+    addDecimalPoint();
+  } else if (event.key === "+" || event.key === "-" || event.key === "*" || event.key === "/") {
+    setOperator(event.key);
+  } else if (event.key === "=" || event.key === "Enter" && (operator && firstNumber && secondNumber)) {
+    operate(operator, firstNumber, secondNumber);
+  } else if (event.key === "Backspace") {
+    backspace();
+  }
+  console.log(event.key); // TESTING
+});
+
+
+
 function setFirstOrSecondNumber(number) {
-  if (number === divideByZeroText) {
-    return;
-  } else if (!operator) {
+  if (number === divideByZeroText) return; 
+  else if (!operator) {
     firstNumber += number;
     appendDisplayText(number.toString());
   } else {
@@ -120,16 +133,15 @@ function setFirstOrSecondNumber(number) {
 }
 
 function setOperator(pendingOperator) {
-  if (operator === "÷" && Number.secondNumber === 0) { // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
-    return;
-  } else if (firstNumber && !operator) {
+  if (operator === "/" && Number.secondNumber === 0) return; // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
+  else if (firstNumber && !operator) {
     operator = pendingOperator;
     appendDisplayText(" " + operator + " ");
   } else if (operator && firstNumber && secondNumber) { // This will run if an equation is present but an operator is clicked
     operate(operator, firstNumber, secondNumber);
     operator = pendingOperator;
     appendDisplayText(" " + operator + " ");
-  };
+  }
   testLog();
 }
 
@@ -140,28 +152,28 @@ function addDecimalPoint() {
   } else if (operator && secondNumber && !secondNumber.includes(".")) {
     secondNumber += ".";
     appendDisplayText(".");
-  };
-};
+  }
+}
 
 function add(number1, number2) {
   return number1 + number2;
-};
+}
 
 function subtract(number1, number2) {
   return number1 - number2;
-};
+}
 
 function multiply(number1, number2) {
   return number1 * number2;
-};
+}
 
 function divide(number1, number2) {
   if (Number(number2) == 0) {
     return divideByZeroText;
-  }; 
+  } 
   return number1 / number2;
 
-};
+}
 
 function clear() {
   firstNumber = "";
@@ -172,21 +184,21 @@ function clear() {
 
 function clearText() {
   clear();
-  calculatorDisplay.textContent = ""
+  calculatorDisplay.textContent = "";
 }
 
 function backspace() {
   if (firstNumber && !operator && !secondNumber) {
     calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -1);
-    displayText = displayText.slice(0, -1)
+    displayText = displayText.slice(0, -1);
     firstNumber = firstNumber.slice(0, -1);
   } else if (firstNumber && operator && !secondNumber) {
     calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -3);
-    displayText = displayText.slice(0, -3)
+    displayText = displayText.slice(0, -3);
     operator = null;
   } else if (firstNumber && operator && secondNumber) {
     calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -1);
-    displayText = displayText.slice(0, -1)
+    displayText = displayText.slice(0, -1);
     secondNumber = secondNumber.slice(0, -1);
   }
   testLog();
@@ -201,16 +213,16 @@ function operate(theOperator, number1, number2) {
     answer = add(number1, number2);
   } else if (theOperator == "-") {
     answer = subtract(number1, number2);
-  } else if (theOperator == "×") {
+  } else if (theOperator == "*") {
     answer = multiply(number1, number2);
-  } else if (theOperator == "÷") {
+  } else if (theOperator == "/") {
     answer = divide(number1, number2);
   } 
   if (answer !== divideByZeroText) {
-  answer = Math.round(answer * 1000) / 1000
+    answer = Math.round(answer * 1000) / 1000;
   }
   clear();
-  if (answer === divideByZeroText) calculatorDisplay.textContent = answer
+  if (answer === divideByZeroText) calculatorDisplay.textContent = answer;
   setFirstOrSecondNumber(answer.toString());
 
   console.log(calculatorDisplay.textContent);
