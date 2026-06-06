@@ -1,5 +1,4 @@
-// fix rounding when there is less then 3 decimal places, such as 5.600
-// backspace button
+// git commit text: fixed dividing by a decimal starting with "0." not working and (explain backspace)
 // keyboard support
 // Add semicolons
 // html + css
@@ -27,6 +26,7 @@ const multiplyButton = document.querySelector("#multiply-button");
 const divideButton = document.querySelector("#divide-button");
 const equalsButton = document.querySelector("#equals-button");
 const clearButton = document.querySelector("#clear-button");
+const backspaceButton = document.querySelector("#backspace-button")
 
 const calculatorDisplay = document.querySelector("#calculator-display");
 
@@ -99,6 +99,8 @@ clearButton.addEventListener("click", () => {
   testLog();
 });
 
+backspaceButton.addEventListener("click", backspace);
+
 function appendDisplayText(appendingText) {
   calculatorDisplay.textContent = displayText += appendingText;
 }
@@ -118,7 +120,7 @@ function setFirstOrSecondNumber(number) {
 }
 
 function setOperator(pendingOperator) {
-  if (operator === "÷" && secondNumber === "0") { // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
+  if (operator === "÷" && Number.secondNumber === 0) { // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
     return;
   } else if (firstNumber && !operator) {
     operator = pendingOperator;
@@ -132,9 +134,7 @@ function setOperator(pendingOperator) {
 }
 
 function addDecimalPoint() {
-  if (operator === "÷" && secondNumber === "0") { // If the user attempts to divide by zero, the answer of that cannot be added on to and so the decimal button will be disabled
-    return;
-  } else if (!operator && firstNumber && !firstNumber.includes(".")) {
+  if (!operator && firstNumber && !firstNumber.includes(".")) {
     firstNumber += ".";
     appendDisplayText(".");
   } else if (operator && secondNumber && !secondNumber.includes(".")) {
@@ -156,7 +156,7 @@ function multiply(number1, number2) {
 };
 
 function divide(number1, number2) {
-  if (number2 == 0) {
+  if (Number(number2) == 0) {
     return divideByZeroText;
   }; 
   return number1 / number2;
@@ -175,6 +175,23 @@ function clearText() {
   calculatorDisplay.textContent = ""
 }
 
+function backspace() {
+  if (firstNumber && !operator && !secondNumber) {
+    calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -1);
+    displayText = displayText.slice(0, -1)
+    firstNumber = firstNumber.slice(0, -1);
+  } else if (firstNumber && operator && !secondNumber) {
+    calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -3);
+    displayText = displayText.slice(0, -3)
+    operator = null;
+  } else if (firstNumber && operator && secondNumber) {
+    calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -1);
+    displayText = displayText.slice(0, -1)
+    secondNumber = secondNumber.slice(0, -1);
+  }
+  testLog();
+}
+
 function operate(theOperator, number1, number2) {
   number1 = Number(number1);
   number2 = Number(number2);
@@ -188,9 +205,10 @@ function operate(theOperator, number1, number2) {
     answer = multiply(number1, number2);
   } else if (theOperator == "÷") {
     answer = divide(number1, number2);
-  }
+  } 
+  if (answer !== divideByZeroText) {
   answer = Math.round(answer * 1000) / 1000
-
+  }
   clear();
   if (answer === divideByZeroText) calculatorDisplay.textContent = answer
   setFirstOrSecondNumber(answer.toString());
