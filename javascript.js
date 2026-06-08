@@ -1,4 +1,11 @@
 // html + css
+// meme that shows up if you try dividing by zero?
+// pi?
+// exponentiation?
+// square root? bonus for negative error message
+// percent?
+// negative (-) symbols for inputting negative numbers?
+// reciprocals? this is a tough one
 var operator = null;
 var firstNumber = "";
 var secondNumber = "";
