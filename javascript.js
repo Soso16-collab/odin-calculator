@@ -29,6 +29,7 @@ const subtractButton = document.querySelector("#subtract-button");
 const multiplyButton = document.querySelector("#multiply-button");
 const divideButton = document.querySelector("#divide-button");
 const equalsButton = document.querySelector("#equals-button");
+const plusOrMinusButton = document.querySelector("#plus-or-minus-button");
 const clearButton = document.querySelector("#clear-button");
 const backspaceButton = document.querySelector("#backspace-button");
 
