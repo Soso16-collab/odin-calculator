@@ -40,7 +40,7 @@ body {
 
 .button-row button {
     display: flex;
-    width: calc(25% - 10px); /* the second number is x2 the button margin */
+    width: calc(20% - 10px); /* the second number is x2 the button margin */
 }
 
 button {
@@ -55,10 +55,11 @@ button {
 }
 
 #clear-button { /* This makes the clear button x2 the width of normal buttons */
-    width: calc(50% - 10px);
-    aspect-ratio: 2 / 1;
+    width: calc(40% - 10px); 
+    aspect-ratio: auto; 
 }
 
 .operator-button {
     background-color: rgb(255, 204, 0);
 }
+    
