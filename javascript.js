@@ -1,4 +1,4 @@
-// html + css
+// prevent calculator-display overflow ??
 // meme that shows up if you try dividing by zero?
 // pi?
 // exponentiation?
@@ -117,7 +117,7 @@ document.addEventListener("keydown", (event) => {
     addDecimalPoint();
   } else if (event.key === "+" || event.key === "-" || event.key === "*" || event.key === "/") {
     setOperator(event.key);
-  } else if (event.key === "=" || event.key === "Enter" && (operator && firstNumber && secondNumber)) {
+  } else if (event.key === "=" && firstNumber && secondNumber || event.key === "Enter" && (operator && firstNumber && secondNumber)) {
     operate(operator, firstNumber, secondNumber);
   } else if (event.key === "Backspace") {
     backspace();
