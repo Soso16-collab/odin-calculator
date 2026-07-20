@@ -6,11 +6,15 @@
 // percent?
 // negative (-) symbols for inputting negative numbers?
 // reciprocals? this is a tough one
+
+// CURRENT:
+// Add additional clause accounting for pi in setFirstOrSecondNumber that will set the screen element as π but the actual value as the variable pi
 var operator = null;
 var firstNumber = "";
 var secondNumber = "";
 var displayText = "";
 var divideByZeroText = "Nice try! You can't divide by zero.";
+const pi = Math.PI;
 
 const zeroButton = document.querySelector("#zero-button");
 const oneButton = document.querySelector("#one-button");
@@ -23,13 +27,18 @@ const sevenButton = document.querySelector("#seven-button");
 const eightButton = document.querySelector("#eight-button");
 const nineButton = document.querySelector("#nine-button");
 const decimalButton = document.querySelector("#decimal-button");
+const piButton = document.querySelector("#pi-button");
 
 const plusButton = document.querySelector("#plus-button");
 const subtractButton = document.querySelector("#subtract-button");
 const multiplyButton = document.querySelector("#multiply-button");
 const divideButton = document.querySelector("#divide-button");
+const percentOfButton = document.querySelector("#percent-of-button");
+const exponentButton = document.querySelector("#exponent-button");
+const squareRootButton = document.querySelector("#square-root-button");
+const reciprocalButton = document.querySelector("#reciprocal-button");
 const equalsButton = document.querySelector("#equals-button");
-const plusOrMinusButton = document.querySelector("#plus-or-minus-button");
+const positiveOrNegativeButton = document.querySelector("#positive-or-negative-button");
 const clearButton = document.querySelector("#clear-button");
 const backspaceButton = document.querySelector("#backspace-button");
 
@@ -77,6 +86,10 @@ nineButton.addEventListener("click", () => {
 
 decimalButton.addEventListener("click", addDecimalPoint);
 
+piButton.addEventListener("click", () => {
+  setFirstOrSecondNumber(pi);
+});
+
 plusButton.addEventListener("click", () => {
   setOperator("+");
 });
@@ -93,11 +106,29 @@ divideButton.addEventListener("click", () => {
   setOperator("/");
 });
 
+percentOfButton.addEventListener("click", () => {
+  setOperator("%");
+});
+
+exponentButton.addEventListener("click", () => {
+  setOperator("^");
+});
+
+squareRootButton.addEventListener("click", () => {
+  setOperator("sqrt");
+});
+
+reciprocalButton.addEventListener("click", () => {
+  setOperator("1/x");
+});
+
 equalsButton.addEventListener("click", () => {
   if (operator && firstNumber && secondNumber) {
     operate(operator, firstNumber, secondNumber);
   }
 });
+
+positiveOrNegativeButton.addEventListener("click", positiveOrNegative);
 
 clearButton.addEventListener("click", () => {
   clearText();
@@ -115,7 +146,7 @@ document.addEventListener("keydown", (event) => {
     setFirstOrSecondNumber(event.key);
   } else if (event.key === ".") {
     addDecimalPoint();
-  } else if (event.key === "+" || event.key === "-" || event.key === "*" || event.key === "/") {
+  } else if (event.key === "+" || event.key === "-" || event.key === "*" || event.key === "/" || event.key === "%" || event.key === "^") {
     setOperator(event.key);
   } else if (event.key === "=" && firstNumber && secondNumber || event.key === "Enter" && (operator && firstNumber && secondNumber)) {
     operate(operator, firstNumber, secondNumber);
@@ -142,6 +173,10 @@ function setFirstOrSecondNumber(number) {
 
 function setOperator(pendingOperator) {
   if (operator === "/" && Number.secondNumber === 0) return; // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
+  else if (firstNumber && !operator && pendingOperator === "%") {
+    operator = pendingOperator
+    appendDisplayText(operator + " of ");
+  }
   else if (firstNumber && !operator) {
     operator = pendingOperator;
     appendDisplayText(" " + operator + " ");
@@ -149,7 +184,7 @@ function setOperator(pendingOperator) {
     operate(operator, firstNumber, secondNumber);
     operator = pendingOperator;
     appendDisplayText(" " + operator + " ");
-  }
+  };
   testLog();
 }
 
@@ -161,6 +196,10 @@ function addDecimalPoint() {
     secondNumber += ".";
     appendDisplayText(".");
   }
+}
+
+function positiveOrNegative() {
+
 }
 
 function add(number1, number2) {
@@ -183,6 +222,22 @@ function divide(number1, number2) {
 
 }
 
+function reciprocate(number) {
+
+}
+
+function squareRoot(number) {
+
+}
+
+function exponentiate(number1, number2) {
+
+}
+
+function percentOf(number1, number2) {
+  return (number1 / 100) * number2;
+}
+
 function clear() {
   firstNumber = "";
   operator = null;
@@ -200,6 +255,10 @@ function backspace() {
     calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -1);
     displayText = displayText.slice(0, -1);
     firstNumber = firstNumber.slice(0, -1);
+  } else if (firstNumber && operator === "%" && !secondNumber) { // Different because "% of " is 5 characters instead of 3
+    calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -5);
+    displayText = displayText.slice(0, -5);
+    operator = null;
   } else if (firstNumber && operator && !secondNumber) {
     calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -3);
     displayText = displayText.slice(0, -3);
@@ -225,7 +284,9 @@ function operate(theOperator, number1, number2) {
     answer = multiply(number1, number2);
   } else if (theOperator == "/") {
     answer = divide(number1, number2);
-  } 
+  }  else if (theOperator == "%") {
+    answer = percentOf(number1, number2);
+  }
   if (answer !== divideByZeroText) {
     answer = Math.round(answer * 1000) / 1000;
   }
@@ -237,5 +298,9 @@ function operate(theOperator, number1, number2) {
 }
 
 function testLog() {
+  if (operator === "%") {
+    console.log(firstNumber + operator + " of " + secondNumber)
+  } else {
   console.log(firstNumber + " " + operator + " " + secondNumber);
+  }
 }
