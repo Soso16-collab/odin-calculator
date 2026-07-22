@@ -1,15 +1,10 @@
 // prevent calculator-display overflow ??
 // meme that shows up if you try dividing by zero?
-// pi?
-// exponentiation?
-// square root? bonus for negative error message
-// percent?
-// negative (-) symbols for inputting negative numbers?
-// reciprocals? this is a tough one
 // remove displayText ???
 
 // CURRENT:
-// Add additional clause accounting for pi in setFirstOrSecondNumber that will set the screen element as π but the actual value as the variable pi
+
+let calculatorState = "empty";
 let operator = null;
 let firstNumber = "";
 let secondNumber = "";
@@ -17,7 +12,7 @@ let displayText = "";
 let divideByZeroText = "Nice try! You can't divide by zero.";
 let reciprocalOfZeroText = ".ytinifnI"
 let squareRootNegativeText = "Well well well. Imaginary numbers are not built in.";
-const pi = Math.PI;
+const pi = 3.142;
 
 const zeroButton = document.querySelector("#zero-button");
 const oneButton = document.querySelector("#one-button");
@@ -124,8 +119,8 @@ reciprocalButton.addEventListener("click", () => unaryOperate(reciprocate));
 squareRootButton.addEventListener("click", () => unaryOperate(squareRoot));
 
 equalsButton.addEventListener("click", () => {
-  if (operator && firstNumber && secondNumber) {
-    operate(operator, firstNumber, secondNumber);
+  if (calculatorState === "enteringSecondNumber") {
+    binaryOperate(operator, firstNumber, secondNumber);
   }
 });
 
@@ -141,14 +136,14 @@ function appendDisplayText(appendingText) {
 }
 
 document.addEventListener("keydown", (event) => {
-  if (!Number.isNaN(Number(event.key))) {
+  if (!Number.isNaN(Number(event.key))) { // could simplify logic
     setFirstOrSecondNumber(event.key);
   } else if (event.key === ".") {
     addDecimalPoint();
   } else if (event.key === "+" || event.key === "-" || event.key === "*" || event.key === "/" || event.key === "%" || event.key === "^") {
     setOperator(event.key);
-  } else if (event.key === "=" && firstNumber && secondNumber || event.key === "Enter" && (operator && firstNumber && secondNumber)) {
-    operate(operator, firstNumber, secondNumber);
+  } else if (calculatorState === "enteringSecondNumber" && (event.key === "=" || event.key === "enter")) {
+    binaryOperate(operator, firstNumber, secondNumber);
   } else if (event.key === "Backspace") {
     backspace();
   }
@@ -158,43 +153,46 @@ document.addEventListener("keydown", (event) => {
 
 
 function setFirstOrSecondNumber(number) {
-  if (number === divideByZeroText || number === squareRootNegativeText) return; 
-  else if (!operator) {
+  if ((calculatorState === "empty" || (calculatorState === "enteringFirstNumber" && number !== pi))) { // Make logic simplier considering empty is repeated?
     firstNumber += number;
     appendDisplayText(number.toString());
-  } else {
+    calculatorState = "enteringFirstNumber";
+  } else if ((number !== pi) || (number === pi && calculatorState === "operatorSelected")) { // The first logic statement does not check if the calculatorState is enteringSecondNumber because if the state was not empty or enteringFirstNumber (as seen in the first logic statement above) and a number was inputted, the operator must exist.
     secondNumber += number;
     appendDisplayText(number.toString());
+    calculatorState = "enteringSecondNumber";
   }
-
   testLog();
 }
 
 function setOperator(pendingOperator) {
   if (operator === "/" && Number(secondNumber) === 0) return; // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
-  else if (firstNumber && !operator && pendingOperator === "%") {
-    operator = pendingOperator
-    appendDisplayText(operator + " of ");
-  } else if (firstNumber && !operator) {
+  else if (calculatorState === "enteringFirstNumber") {
     operator = pendingOperator;
-    appendDisplayText(" " + operator + " ");
-  } else if (operator && firstNumber && secondNumber && pendingOperator === "%") {
-    operate(operator, firstNumber, secondNumber);
+    appendDisplayText(
+      `${pendingOperator === "%" 
+        ? "% of " 
+        : ` ${operator} `
+      }`);
+    calculatorState = "operatorSelected";
+  } else if (calculatorState === "enteringSecondNumber") {
+    binaryOperate(operator, firstNumber, secondNumber);
     operator = pendingOperator;
-    appendDisplayText(operator + " of ");
-  } else if (operator && firstNumber && secondNumber) { // This will run if an equation is present but an operator is clicked
-    operate(operator, firstNumber, secondNumber);
-    operator = pendingOperator;
-    appendDisplayText(" " + operator + " ");
+    appendDisplayText(
+      `${pendingOperator === "%" 
+        ? "% of " 
+        : ` ${operator} `
+      }`);
+    calculatorState = "operatorSelected";
   };
   testLog();
 }
 
 function addDecimalPoint() {
-  if (!operator && firstNumber && !firstNumber.includes(".")) {
+  if (calculatorState === "enteringFirstNumber" && !firstNumber.includes(".")) {
     firstNumber += ".";
     appendDisplayText(".");
-  } else if (operator && secondNumber && !secondNumber.includes(".")) {
+  } else if (calculatorState === "enteringSecondNumber" && !secondNumber.includes(".")) {
     secondNumber += ".";
     appendDisplayText(".");
   }
@@ -244,34 +242,12 @@ function squareRoot(number) {
   else return Math.sqrt(number);
 }
 
-function unaryOperate(unaryFunction) {
-  if (firstNumber && !operator && !secondNumber) {
-    firstNumber = roundNumber(unaryFunction(firstNumber));
-    if (typeof firstNumber === "string") { // This means an error message was pushed
-      calculatorDisplay.textContent = firstNumber;
-      clear();
-      return;
-    }
-    displayText = firstNumber;
-    calculatorDisplay.textContent = displayText;
-  } else if (firstNumber && operator && secondNumber) {
-    secondNumber = roundNumber(unaryFunction(secondNumber));
-    if (typeof secondNumber === "string") { // This means an error message was pushed
-      calculatorDisplay.textContent = secondNumber;
-      clear();
-      return;
-    }
-    displayText = firstNumber + ` ${operator} ` + secondNumber;
-    calculatorDisplay.textContent = displayText;
-  }
-  testLog();
-}
-
 function clear() {
   firstNumber = "";
   operator = null;
   secondNumber = "";
   displayText = "";
+  calculatorState = "empty";
 }
 
 function clearText() {
@@ -280,61 +256,80 @@ function clearText() {
 }
 
 function backspace() {
-  if (firstNumber && !operator && !secondNumber) {
-    calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -1);
-    displayText = displayText.slice(0, -1);
+  let characterSliceAmount = 0;
+  if (calculatorState === "enteringFirstNumber") {
+    characterSliceAmount = 1;
     firstNumber = firstNumber.slice(0, -1);
-  } else if (firstNumber && operator === "%" && !secondNumber) { // Different because "% of " is 5 characters instead of 3
-    calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -5);
-    displayText = displayText.slice(0, -5);
+    if (firstNumber === "") calculatorState = "empty";
+  } else if (calculatorState === "operatorSelected") {
+    characterSliceAmount = operator === "%" ? 5 : 3;
     operator = null;
-  } else if (firstNumber && operator && !secondNumber) {
-    calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -3);
-    displayText = displayText.slice(0, -3);
-    operator = null;
-  } else if (firstNumber && operator && secondNumber) {
-    calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -1);
-    displayText = displayText.slice(0, -1);
+    calculatorState = "enteringFirstNumber";  
+  } else if (calculatorState === "enteringSecondNumber") {
+    characterSliceAmount = 1;
     secondNumber = secondNumber.slice(0, -1);
+    if (secondNumber === "") calculatorState = "operatorSelected";
   }
+  calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -characterSliceAmount);
+  displayText = displayText.slice(0, -characterSliceAmount);
   testLog();
 }
 
-function operate(theOperator, number1, number2) {
+function binaryOperate(binaryOperator, number1, number2) {
   number1 = Number(number1);
   number2 = Number(number2);
   let answer = null;
 
-  if (theOperator == "+") {
+  if (binaryOperator == "+") {
     answer = add(number1, number2);
-  } else if (theOperator == "-") {
+  } else if (binaryOperator == "-") {
     answer = subtract(number1, number2);
-  } else if (theOperator == "*") {
+  } else if (binaryOperator == "*") {
     answer = multiply(number1, number2);
-  } else if (theOperator == "/") {
+  } else if (binaryOperator == "/") {
     answer = divide(number1, number2);
-  } else if (theOperator == "^") {
+  } else if (binaryOperator == "^") {
     answer = exponentiate(number1, number2);
-  } else if (theOperator == "%") {
+  } else if (binaryOperator == "%") {
     answer = percentOf(number1, number2);
   }
   answer = roundNumber(answer);
   clear();
-  if (answer === divideByZeroText) calculatorDisplay.textContent = answer;
-  setFirstOrSecondNumber(answer.toString());
+  if (answer === divideByZeroText || answer === Infinity || Number.isNaN(answer)) { // Errors
+    calculatorDisplay.textContent = answer;
+  } else {
+    setFirstOrSecondNumber(answer.toString());
+  }
 
   console.log(calculatorDisplay.textContent);
 }
 
+function unaryOperate(unaryFunction) {
+  let answer = null;
+  if (calculatorState === "enteringFirstNumber" || calculatorState === "enteringSecondNumber") {
+    answer = roundNumber(unaryFunction(calculatorState === "enteringFirstNumber" ? firstNumber : secondNumber));
+    if (answer === reciprocalOfZeroText || answer === squareRootNegativeText) { // Errors
+      clear();
+      calculatorDisplay.textContent = answer;
+    } else {
+      calculatorState === "enteringFirstNumber" 
+      ? ((firstNumber = answer), displayText = answer) 
+      : ((secondNumber = answer), displayText = firstNumber + ` ${operator} ` + secondNumber);
+      calculatorDisplay.textContent = displayText;
+    }
+  }
+  testLog();
+}
+
 function roundNumber(number) {
-  if (typeof (number) === "number") return Math.round(number * 1000) / 1000;
-  else return number; // This clause exists for the sake of the negative square root error message to not make the unary function more complex
+  if (typeof (number) === "number") return (Math.round(number * 1000) / 1000).toString();
+  else return number; // This clause happens when number is an error message
 }
 
 function testLog() {
-  if (operator === "%") {
-    console.log(firstNumber + operator + " of " + secondNumber)
-  } else {
-  console.log(firstNumber + " " + operator + " " + secondNumber);
-  }
+  console.log(firstNumber + 
+  `${operator === "%" 
+  ? operator + " of " 
+  : ` ${operator} `
+  }` + secondNumber + ` ${calculatorState}`);
 }
