@@ -18,7 +18,8 @@ body {
 }
 
 #calculator-display {
-    width: 100%;
+    width: 100%; 
+    word-break: break-all;
     flex: 0 0 34.4px; /* the flex-basis value can be found by checking the height of calculator-display when numbers are present, it changes depending on the font-size value */
     background-color: #111111;
     color: #FFFFFF;

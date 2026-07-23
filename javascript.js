@@ -1,14 +1,9 @@
-// prevent calculator-display overflow ??
-// meme that shows up if you try dividing by zero?
-// remove displayText ???
-
-// CURRENT:
+// IF parentheses are added, the UI should have the calculator state on the bottom left taking up 3 button spaces and the left + right parentheses next to it taking 2 spaces
 
 let calculatorState = "empty";
 let operator = null;
 let firstNumber = "";
 let secondNumber = "";
-let displayText = "";
 let divideByZeroText = "Nice try! You can't divide by zero.";
 let reciprocalOfZeroText = ".ytinifnI"
 let squareRootNegativeText = "Well well well. Imaginary numbers are not built in.";
@@ -125,24 +120,20 @@ equalsButton.addEventListener("click", () => {
 });
 
 clearButton.addEventListener("click", () => {
-  clearText();
+  clear();
   testLog();
 });
 
 backspaceButton.addEventListener("click", backspace);
 
-function appendDisplayText(appendingText) {
-  calculatorDisplay.textContent = displayText += appendingText;
-}
-
 document.addEventListener("keydown", (event) => {
-  if (!Number.isNaN(Number(event.key))) { // could simplify logic
+  if (!Number.isNaN(Number(event.key))) { // Essentially if event.key is a string representing a number. typeof cannot be used because NaN's type is also a number, which means Number.isNaN() is required.
     setFirstOrSecondNumber(event.key);
   } else if (event.key === ".") {
     addDecimalPoint();
   } else if (event.key === "+" || event.key === "-" || event.key === "*" || event.key === "/" || event.key === "%" || event.key === "^") {
     setOperator(event.key);
-  } else if (calculatorState === "enteringSecondNumber" && (event.key === "=" || event.key === "enter")) {
+  } else if (calculatorState === "enteringSecondNumber" && (event.key === "=" || event.key === "Enter")) {
     binaryOperate(operator, firstNumber, secondNumber);
   } else if (event.key === "Backspace") {
     backspace();
@@ -153,36 +144,42 @@ document.addEventListener("keydown", (event) => {
 
 
 function setFirstOrSecondNumber(number) {
-  if ((calculatorState === "empty" || (calculatorState === "enteringFirstNumber" && number !== pi))) { // Make logic simplier considering empty is repeated?
+  if (!(calculatorDisplay.style.backgroundImage === "")) { // This occurs when a meme is currently displayed
+    resetImageState();
+  };
+  if (calculatorState === "error") {
+    calculatorDisplay.textContent = "";
+    calculatorState = "empty";
+  }
+  if ((calculatorState === "empty" || (calculatorState === "enteringFirstNumber" && number !== pi))) {
     firstNumber += number;
-    appendDisplayText(number.toString());
+    calculatorDisplay.textContent += number.toString();
     calculatorState = "enteringFirstNumber";
   } else if ((number !== pi) || (number === pi && calculatorState === "operatorSelected")) { // The first logic statement does not check if the calculatorState is enteringSecondNumber because if the state was not empty or enteringFirstNumber (as seen in the first logic statement above) and a number was inputted, the operator must exist.
     secondNumber += number;
-    appendDisplayText(number.toString());
+    calculatorDisplay.textContent += number.toString();
     calculatorState = "enteringSecondNumber";
-  }
+  };
   testLog();
-}
+};
 
 function setOperator(pendingOperator) {
-  if (operator === "/" && Number(secondNumber) === 0) return; // If the user attempts to divide by zero, the answer of that cannot be operated on and so the operator buttons will be disabled
-  else if (calculatorState === "enteringFirstNumber") {
+  if (calculatorState === "enteringFirstNumber") {
     operator = pendingOperator;
-    appendDisplayText(
+    calculatorDisplay.textContent += 
       `${pendingOperator === "%" 
         ? "% of " 
         : ` ${operator} `
-      }`);
+      }`;
     calculatorState = "operatorSelected";
   } else if (calculatorState === "enteringSecondNumber") {
     binaryOperate(operator, firstNumber, secondNumber);
     operator = pendingOperator;
-    appendDisplayText(
+    calculatorDisplay.textContent += 
       `${pendingOperator === "%" 
         ? "% of " 
         : ` ${operator} `
-      }`);
+      }`;
     calculatorState = "operatorSelected";
   };
   testLog();
@@ -191,10 +188,10 @@ function setOperator(pendingOperator) {
 function addDecimalPoint() {
   if (calculatorState === "enteringFirstNumber" && !firstNumber.includes(".")) {
     firstNumber += ".";
-    appendDisplayText(".");
+    calculatorDisplay.textContent += ".";
   } else if (calculatorState === "enteringSecondNumber" && !secondNumber.includes(".")) {
     secondNumber += ".";
-    appendDisplayText(".");
+    calculatorDisplay.textContent += ".";
   }
 }
 
@@ -228,6 +225,8 @@ function percentOf(number1, number2) {
   return (number1 / 100) * number2;
 }
 
+// Unary Operators
+
 function switchNumberSign(number) {
   return -number;
 }
@@ -246,13 +245,9 @@ function clear() {
   firstNumber = "";
   operator = null;
   secondNumber = "";
-  displayText = "";
-  calculatorState = "empty";
-}
-
-function clearText() {
-  clear();
   calculatorDisplay.textContent = "";
+  resetImageState();
+  calculatorState = "empty";
 }
 
 function backspace() {
@@ -271,7 +266,6 @@ function backspace() {
     if (secondNumber === "") calculatorState = "operatorSelected";
   }
   calculatorDisplay.textContent = calculatorDisplay.textContent.slice(0, -characterSliceAmount);
-  displayText = displayText.slice(0, -characterSliceAmount);
   testLog();
 }
 
@@ -295,10 +289,14 @@ function binaryOperate(binaryOperator, number1, number2) {
   }
   answer = roundNumber(answer);
   clear();
-  if (answer === divideByZeroText || answer === Infinity || Number.isNaN(answer)) { // Errors
+  if (answer === divideByZeroText || answer === Infinity || answer === "Infinity" || Number.isNaN(answer) || answer === "NaN") { // Errors
     calculatorDisplay.textContent = answer;
+    calculatorState = "error";
   } else {
     setFirstOrSecondNumber(answer.toString());
+  }
+  if (answer === divideByZeroText) { // Error Meme
+    displayMeme("https://media1.tenor.com/m/wqagUV53VocAAAAd/scream.gif", "1 / 1");
   }
 
   console.log(calculatorDisplay.textContent);
@@ -311,11 +309,14 @@ function unaryOperate(unaryFunction) {
     if (answer === reciprocalOfZeroText || answer === squareRootNegativeText) { // Errors
       clear();
       calculatorDisplay.textContent = answer;
+      calculatorState = "error";
     } else {
       calculatorState === "enteringFirstNumber" 
-      ? ((firstNumber = answer), displayText = answer) 
-      : ((secondNumber = answer), displayText = firstNumber + ` ${operator} ` + secondNumber);
-      calculatorDisplay.textContent = displayText;
+      ? ((firstNumber = answer), calculatorDisplay.textContent = answer) 
+      : ((secondNumber = answer), calculatorDisplay.textContent = firstNumber + (operator === "%"
+        ? "% of "
+        : ` ${operator} `
+      ) + secondNumber);
     }
   }
   testLog();
@@ -324,6 +325,22 @@ function unaryOperate(unaryFunction) {
 function roundNumber(number) {
   if (typeof (number) === "number") return (Math.round(number * 1000) / 1000).toString();
   else return number; // This clause happens when number is an error message
+}
+
+function displayMeme(memeURL, aspectRatio) {
+  calculatorDisplay.style.backgroundImage = `url(${memeURL})`
+  calculatorDisplay.style.backgroundSize = "cover";
+  calculatorDisplay.style.backgroundPosition = "center";
+  calculatorDisplay.style.backgroundRepeat = "no-repeat";
+  calculatorDisplay.style.aspectRatio = aspectRatio;
+}
+
+function resetImageState() {
+    calculatorDisplay.style.backgroundImage = "";
+    calculatorDisplay.style.backgroundSize = "";
+    calculatorDisplay.style.backgroundPosition = "";
+    calculatorDisplay.style.backgroundRepeat = "";
+    calculatorDisplay.style.aspectRatio = "";
 }
 
 function testLog() {
